@@ -18,16 +18,19 @@ public class Item {
     private int quantity;
     @ColumnInfo
     private BigDecimal fullPrice;
+    @ColumnInfo(name = "partySysId")
+    private long partySysId;
 
     public Item() {
     }
 
-    public Item(long sysId, String name, BigDecimal price, int quantity, BigDecimal fullPrice) {
+    public Item(long sysId, String name, BigDecimal price, int quantity, BigDecimal fullPrice, long partySysId) {
         this.sysId = sysId;
         this.name = name;
         this.price = price;
         this.quantity = quantity;
         this.fullPrice = fullPrice;
+        this.partySysId = partySysId;
     }
 
     public long getSysId() {
@@ -68,5 +71,13 @@ public class Item {
 
     public void setFullPrice(BigDecimal fullPrice) {
         this.fullPrice = fullPrice;
+    }
+
+    public long getPartySysId() {
+        return partySysId;
+    }
+
+    public void setPartySysId(long partySysId) {
+        this.partySysId = partySysId;
     }
 }

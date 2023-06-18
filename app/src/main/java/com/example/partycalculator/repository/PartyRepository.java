@@ -7,7 +7,7 @@ import com.example.partycalculator.db.AppDatabase;
 import com.example.partycalculator.entity.Party;
 
 import java.util.List;
-
+@Deprecated
 public class PartyRepository {
     private PartyDao mPartyDao;
     private List<Party> mAllParties;

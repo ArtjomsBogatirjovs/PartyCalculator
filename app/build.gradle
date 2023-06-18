@@ -41,7 +41,11 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:$room_version"
     //
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
-
+//
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+//
+    //Gson Converter
+    implementation 'com.google.code.gson:gson:2.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'

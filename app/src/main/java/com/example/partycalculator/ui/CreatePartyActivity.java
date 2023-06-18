@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.example.partycalculator.R;
 import com.example.partycalculator.db.AppDatabase;
 import com.example.partycalculator.entity.Party;
+import com.example.partycalculator.entity.PartySingleton;
 import com.example.partycalculator.utils.Functions;
 
 public class CreatePartyActivity extends AppCompatActivity {
@@ -41,7 +42,7 @@ public class CreatePartyActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.party_name_length, Toast.LENGTH_SHORT).show();
             return false;
         }
-        if (!databaseClient.partyDao().getByName(name).isEmpty()) {
+        if (databaseClient.partyDao().getByName(name) != null) {
             Toast.makeText(CreatePartyActivity.this, "Party with this name already exist!", Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -51,6 +52,7 @@ public class CreatePartyActivity extends AppCompatActivity {
     class  CreatePartyTask extends AsyncTask<Void, Void, Void> {
 
         private final String partyName;
+        private Party party;
         private boolean isOkay = true;
 
         public CreatePartyTask(String partyName) {
@@ -61,8 +63,9 @@ public class CreatePartyActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             AppDatabase databaseClient = AppDatabase.getDatabase(getApplicationContext());
 
-            Party party = new Party();
+            party = new Party();
             party.setName(partyName);
+            party.setDeleted(false);
 
             try {
                 databaseClient.partyDao().insertParty(party);
@@ -80,7 +83,8 @@ public class CreatePartyActivity extends AppCompatActivity {
             if (isOkay) {
                 Toast.makeText(CreatePartyActivity.this, "Party Created!", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(CreatePartyActivity.this, PartyActivity.class);
-                intent.putExtra("party_name", partyName);
+                finish();
+                PartySingleton.getInstance().setParty(party);
                 startActivity(intent);
             }
         }

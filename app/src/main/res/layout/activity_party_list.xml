@@ -9,5 +9,35 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_parties"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_above="@id/buttons_layout"/>
+
+    <LinearLayout
+        android:id="@+id/buttons_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnShowAllParties"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/show_all_parties" />
+
+        <Button
+            android:id="@+id/btnShowActiveParties"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/show_active_parties" />
+
+        <Button
+            android:id="@+id/btnShowDeletedParties"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/show_deleted_parties" />
+    </LinearLayout>
 </RelativeLayout>

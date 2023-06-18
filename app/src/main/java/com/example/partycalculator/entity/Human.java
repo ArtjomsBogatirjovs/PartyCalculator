@@ -12,14 +12,17 @@ public class Human {
     private String name;
     @ColumnInfo
     private String familyName;
+    @ColumnInfo
+    private long partySysId;
 
-    public Human(long sysId, String name, String familyName) {
+    public Human() {
+    }
+
+    public Human(long sysId, String name, String familyName, long partySysId) {
         this.sysId = sysId;
         this.name = name;
         this.familyName = familyName;
-    }
-
-    public Human() {
+        this.partySysId = partySysId;
     }
 
     public long getSysId() {
@@ -44,5 +47,13 @@ public class Human {
 
     public void setFamilyName(String familyName) {
         this.familyName = familyName;
+    }
+
+    public long getPartySysId() {
+        return partySysId;
+    }
+
+    public void setPartySysId(long partySysId) {
+        this.partySysId = partySysId;
     }
 }

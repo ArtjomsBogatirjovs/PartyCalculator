@@ -22,8 +22,15 @@ public interface PartyDao {
     void updateParty(Party party);
 
     @Query("select * from Party where name = :name")
-    List<Party> getByName(String name);
+    Party getByName(String name);
 
     @Query("SELECT * FROM Party")
     List<Party> getAllParties();
+    @Query("SELECT * FROM Party where deleted = 0")
+    List<Party> getAllActiveParties();
+    @Query("SELECT * FROM Party where deleted = 1")
+    List<Party> getAllDeletedParties();
+
+    @Query("SELECT * FROM Party WHERE sysId = :partySysId")
+    Party getPartyBySysId(long partySysId);
 }

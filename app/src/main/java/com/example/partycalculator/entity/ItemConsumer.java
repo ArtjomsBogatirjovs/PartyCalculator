@@ -11,19 +11,19 @@ public class ItemConsumer {
     @PrimaryKey(autoGenerate = true)
     private long sysId;
     @ColumnInfo
-    private Item item;
+    private long itemSysId;
     @ColumnInfo
-    private Human human;
+    private long humanSysId;
     @ColumnInfo
     private BigDecimal paid;
 
     public ItemConsumer() {
     }
 
-    public ItemConsumer(long sysId, Item item, Human human, BigDecimal paid) {
+    public ItemConsumer(long sysId, long itemSysId, long humanSysId, BigDecimal paid) {
         this.sysId = sysId;
-        this.item = item;
-        this.human = human;
+        this.itemSysId = itemSysId;
+        this.humanSysId = humanSysId;
         this.paid = paid;
     }
 
@@ -35,27 +35,27 @@ public class ItemConsumer {
         this.sysId = sysId;
     }
 
-    public Item getItem() {
-        return item;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
-    }
-
-    public Human getHuman() {
-        return human;
-    }
-
-    public void setHuman(Human human) {
-        this.human = human;
-    }
-
     public BigDecimal getPaid() {
         return paid;
     }
 
     public void setPaid(BigDecimal paid) {
         this.paid = paid;
+    }
+
+    public long getItemSysId() {
+        return itemSysId;
+    }
+
+    public void setItemSysId(long itemSysId) {
+        this.itemSysId = itemSysId;
+    }
+
+    public long getHumanSysId() {
+        return humanSysId;
+    }
+
+    public void setHumanSysId(long humanSysId) {
+        this.humanSysId = humanSysId;
     }
 }

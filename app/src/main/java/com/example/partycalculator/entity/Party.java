@@ -16,12 +16,15 @@ public class Party {
     @ColumnInfo
     private String description;
 
+    @ColumnInfo
+    private boolean deleted;
     public Party() {
     }
 
-    public Party(String name, String description) {
+    public Party(String name, String description, boolean deleted) {
         this.name = name;
         this.description = description;
+        this.deleted = deleted;
     }
 
     public long getSysId() {
@@ -46,5 +49,13 @@ public class Party {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }
