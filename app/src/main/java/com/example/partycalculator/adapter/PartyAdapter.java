@@ -1,4 +1,4 @@
-package com.example.partycalculator.ui;
+package com.example.partycalculator.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,17 +54,23 @@ public class PartyAdapter extends RecyclerView.Adapter<PartyAdapter.PartyViewHol
 
     public class PartyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final TextView partyItemView;
+        private final ImageButton delete;
 
         public PartyViewHolder(View itemView) {
             super(itemView);
             partyItemView = itemView.findViewById(R.id.text_view_name);
-            ImageButton delete = itemView.findViewById(R.id.button_remove);
+            delete = itemView.findViewById(R.id.button_remove);
             itemView.setOnClickListener(this);
             delete.setOnClickListener(this);
         }
 
         public void bind(Party party) {
             partyItemView.setText(party.getName());
+            if (party.isDeleted()) {
+                delete.setVisibility(View.GONE);
+            } else {
+                delete.setVisibility(View.VISIBLE);
+            }
         }
 
         @Override

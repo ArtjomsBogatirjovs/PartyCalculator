@@ -2,7 +2,7 @@ package com.example.partycalculator.repository;
 
 import android.app.Application;
 
-import com.example.partycalculator.dao.PartyDao;
+import com.example.partycalculator.db.dao.PartyDao;
 import com.example.partycalculator.db.AppDatabase;
 import com.example.partycalculator.entity.Party;
 

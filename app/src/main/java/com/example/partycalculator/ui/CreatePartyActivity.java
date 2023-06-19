@@ -11,11 +11,14 @@ import android.widget.Toast;
 
 import com.example.partycalculator.R;
 import com.example.partycalculator.db.AppDatabase;
+import com.example.partycalculator.db.dao.PartyDao;
 import com.example.partycalculator.entity.Party;
 import com.example.partycalculator.entity.PartySingleton;
 import com.example.partycalculator.utils.Functions;
 
 public class CreatePartyActivity extends AppCompatActivity {
+    private long partySysId;
+    private PartyDao partyDao;
     public static int MAX_NAME_LENGTH = 20;
 
     @Override
@@ -49,7 +52,7 @@ public class CreatePartyActivity extends AppCompatActivity {
         return true;
     }
 
-    class  CreatePartyTask extends AsyncTask<Void, Void, Void> {
+    class CreatePartyTask extends AsyncTask<Void, Void, Void> {
 
         private final String partyName;
         private Party party;
@@ -62,13 +65,14 @@ public class CreatePartyActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             AppDatabase databaseClient = AppDatabase.getDatabase(getApplicationContext());
+            partyDao = databaseClient.partyDao();
 
             party = new Party();
             party.setName(partyName);
             party.setDeleted(false);
 
             try {
-                databaseClient.partyDao().insertParty(party);
+                partySysId = partyDao.insertParty(party);
             } catch (Exception e) {
                 Toast.makeText(CreatePartyActivity.this, "Fail creating party", Toast.LENGTH_SHORT).show();
                 isOkay = false;
@@ -84,7 +88,7 @@ public class CreatePartyActivity extends AppCompatActivity {
                 Toast.makeText(CreatePartyActivity.this, "Party Created!", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(CreatePartyActivity.this, PartyActivity.class);
                 finish();
-                PartySingleton.getInstance().setParty(party);
+                PartySingleton.getInstance().setParty(partyDao.getPartyBySysId(partySysId));
                 startActivity(intent);
             }
         }

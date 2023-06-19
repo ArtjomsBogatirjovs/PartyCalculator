@@ -1,4 +1,4 @@
-package com.example.partycalculator.convertors;
+package com.example.partycalculator.db.convertors;
 
 import androidx.room.TypeConverter;
 

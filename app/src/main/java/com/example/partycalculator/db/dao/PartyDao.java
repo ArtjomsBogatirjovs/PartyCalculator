@@ -1,4 +1,4 @@
-package com.example.partycalculator.dao;
+package com.example.partycalculator.db.dao;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -16,7 +16,7 @@ public interface PartyDao {
     void deleteParty(Party party);
 
     @Insert
-    void insertParty(Party party);
+    long insertParty(Party party);
 
     @Update
     void updateParty(Party party);

@@ -12,15 +12,22 @@ import android.widget.Button;
 
 
 import com.example.partycalculator.R;
-import com.example.partycalculator.dao.PartyDao;
+import com.example.partycalculator.adapter.PartyAdapter;
+import com.example.partycalculator.db.dao.PartyDao;
 import com.example.partycalculator.db.AppDatabase;
 import com.example.partycalculator.entity.Party;
 import com.example.partycalculator.entity.PartySingleton;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PartyListActivity extends AppCompatActivity implements PartyAdapter.OnItemClickListener, PartyAdapter.OnRemoveButtonClickListener {
     private PartyDao partyDao;
+    private PartyAdapter partyAdapter;
+    private List<Party> allParties;
+    private List<Party> deletedParties;
+    private List<Party> activeParties;
+    private boolean isAllParties = false;
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
@@ -30,12 +37,13 @@ public class PartyListActivity extends AppCompatActivity implements PartyAdapter
 
         AppDatabase partyDatabase = AppDatabase.getDatabase(getApplication());
         partyDao = partyDatabase.partyDao();
-        final List<Party> partyList = partyDao.getAllActiveParties();
 
-        PartyAdapter partyAdapter = new PartyAdapter();
+        updatePartyLists();
+
+        partyAdapter = new PartyAdapter();
         partyAdapter.setOnItemClickListener(this);
         partyAdapter.setRemoveButtonClickListener(this);
-        partyAdapter.setPartyList(partyList);
+        partyAdapter.setPartyList(activeParties);
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view_parties);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -47,40 +55,49 @@ public class PartyListActivity extends AppCompatActivity implements PartyAdapter
         Button btnShowActiveParties = findViewById(R.id.btnShowActiveParties);
 
         btnShowAllParties.setOnClickListener(v -> {
-            List<Party> allParties = partyDao.getAllParties();
             partyAdapter.setPartyList(allParties);
             partyAdapter.notifyDataSetChanged();
+            isAllParties = true;
         });
 
         btnShowDeletedParties.setOnClickListener(v -> {
-            List<Party> deletedParties = partyDao.getAllDeletedParties();
             partyAdapter.setPartyList(deletedParties);
             partyAdapter.notifyDataSetChanged();
-
+            isAllParties = false;
         });
 
         btnShowActiveParties.setOnClickListener(v -> {
-            List<Party> activeParties = partyDao.getAllActiveParties();
             partyAdapter.setPartyList(activeParties);
             partyAdapter.notifyDataSetChanged();
+            isAllParties = false;
         });
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onRemoveButtonClick(Party party) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Confirmation");
-        builder.setMessage("Are you sure you want to delete " + party.getName() + " party?");
-        builder.setPositiveButton("Yes", (dialog, which) -> {
-            party.setDeleted(true);
-            partyDao.updateParty(party);
-            recreate();
-        });
-        builder.setNegativeButton("No", null);
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        if (!party.isDeleted()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Confirmation");
+            builder.setMessage("Are you sure you want to delete " + party.getName() + " party?");
+            builder.setPositiveButton("Yes", (dialog, which) -> {
+                party.setDeleted(true);
+                partyDao.updateParty(party);
+                updatePartyLists();
+                if (!isAllParties) {
+                    partyAdapter.setPartyList(activeParties);
+                } else {
+                    partyAdapter.setPartyList(allParties);
+                }
+                partyAdapter.notifyDataSetChanged();
+            });
+            builder.setNegativeButton("No", null);
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onItemClick(Party party) {
         if (party.isDeleted()) {
@@ -90,7 +107,13 @@ public class PartyListActivity extends AppCompatActivity implements PartyAdapter
             builder.setPositiveButton("Yes", (dialog, which) -> {
                 party.setDeleted(false);
                 partyDao.updateParty(party);
-                recreate();
+                updatePartyLists();
+                if (!isAllParties) {
+                    partyAdapter.setPartyList(deletedParties);
+                } else {
+                    partyAdapter.setPartyList(allParties);
+                }
+                partyAdapter.notifyDataSetChanged();
             });
             builder.setNegativeButton("No", null);
             AlertDialog dialog = builder.create();
@@ -101,5 +124,11 @@ public class PartyListActivity extends AppCompatActivity implements PartyAdapter
             PartySingleton.getInstance().setParty(party);
             this.startActivity(intent);
         }
+    }
+
+    private void updatePartyLists() {
+        allParties = partyDao.getAllParties();
+        deletedParties = partyDao.getAllDeletedParties();
+        activeParties = partyDao.getAllActiveParties();
     }
 }

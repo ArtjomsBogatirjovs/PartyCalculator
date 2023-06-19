@@ -1,11 +1,9 @@
 package com.example.partycalculator.ui;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -13,10 +11,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.partycalculator.R;
-import com.example.partycalculator.dao.HumanDao;
+import com.example.partycalculator.adapter.PeopleAdapter;
+import com.example.partycalculator.db.dao.HumanDao;
 import com.example.partycalculator.db.AppDatabase;
 import com.example.partycalculator.entity.Human;
-import com.example.partycalculator.entity.Party;
 import com.example.partycalculator.entity.PartySingleton;
 
 import java.util.List;
@@ -34,26 +32,27 @@ public class PeopleActivity extends PartyToolbarActivity {
         humanDao = partyDatabase.humanDao();
         final List<Human> peopleList = humanDao.getAllHumanInParty(PartySingleton.getInstance().getParty().getSysId());
 
-        PeopleAdapter peopleAdapter = new PeopleAdapter(peopleList);
+        PeopleAdapter selectedPeopleAdapter = new PeopleAdapter(peopleList);
 
         RecyclerView recyclerViewPeople = findViewById(R.id.recyclerViewPeople);
         recyclerViewPeople.setLayoutManager(new LinearLayoutManager(this));
-        recyclerViewPeople.setAdapter(peopleAdapter);
+        recyclerViewPeople.setAdapter(selectedPeopleAdapter);
 
         Button btnAddPerson = findViewById(R.id.btnAddPerson);
         btnAddPerson.setOnClickListener(v -> {
             showCreatePersonDialog();
         });
 
-        peopleAdapter.setOnEditClickListener(position -> {
+        selectedPeopleAdapter.setOnEditClickListener(position -> {
             // Handle edit button click for a specific person
             // Implement the logic to edit the person's parameters
             Human person = peopleList.get(position);
             // Open an edit dialog/fragment or start an edit activity passing the person data
         });
 
-        peopleAdapter.setOnDeleteClickListener(position -> {
+        selectedPeopleAdapter.setOnDeleteClickListener(position -> {
             humanDao.deleteHuman(peopleList.get(position));
+            recreate();
             //peopleList.remove(position);
             //peopleAdapter.notifyItemRemoved(position);
         });

@@ -28,4 +28,6 @@
     <string name="show_deleted_parties">Show Deleted Parties</string>
     <string name="show_active_parties">Show Active Parties</string>
     <string name="show_all_parties">Show All Parties</string>
+    <string name="add_item">Add Item</string>
+    <string name="paid">Paid</string>
 </resources>

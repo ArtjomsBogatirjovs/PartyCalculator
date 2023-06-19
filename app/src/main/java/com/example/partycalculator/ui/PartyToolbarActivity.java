@@ -3,6 +3,7 @@ package com.example.partycalculator.ui;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.ClipData;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -29,23 +30,23 @@ public class PartyToolbarActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
+        Intent intent = null;
         switch (id) {
             case R.id.action_option1:
                 if(this instanceof PeopleActivity){
                     return true;
                 }
                 finish();
-                Intent intent = new Intent(this, PeopleActivity.class);
+                intent = new Intent(this, PeopleActivity.class);
                 this.startActivity(intent);
                 return true;
             case R.id.action_option2:
-                //if(this instanceof ItemActivity){
-                //    return true;
-                //}
+                if(this instanceof ItemActivity){
+                    return true;
+                }
                 finish();
-                // Handle Option 2 selection
-                // Start a new activity or perform the desired action
+                intent = new Intent(this, ItemActivity.class);
+                this.startActivity(intent);
                 return true;
             case R.id.action_option3:
                 //if(this instanceof DebtActivity){

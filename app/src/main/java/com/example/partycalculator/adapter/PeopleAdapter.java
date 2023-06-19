@@ -1,4 +1,4 @@
-package com.example.partycalculator.ui;
+package com.example.partycalculator.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;

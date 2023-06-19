@@ -8,10 +8,11 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
 
-import com.example.partycalculator.dao.HumanDao;
-import com.example.partycalculator.dao.ItemDao;
-import com.example.partycalculator.dao.PartyDao;
-import com.example.partycalculator.convertors.BigDecimalConverter;
+import com.example.partycalculator.db.dao.HumanDao;
+import com.example.partycalculator.db.dao.ItemConsumerDao;
+import com.example.partycalculator.db.dao.ItemDao;
+import com.example.partycalculator.db.dao.PartyDao;
+import com.example.partycalculator.db.convertors.BigDecimalConverter;
 import com.example.partycalculator.entity.Human;
 import com.example.partycalculator.entity.Item;
 import com.example.partycalculator.entity.ItemConsumer;
@@ -31,6 +32,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract HumanDao humanDao();
 
     public abstract ItemDao itemDao();
+
+    public abstract ItemConsumerDao itemConsumerDao();
 
     private static volatile AppDatabase INSTANCE;
     private static final int NUMBER_OF_THREADS = 4;

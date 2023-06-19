@@ -1,4 +1,4 @@
-package com.example.partycalculator.dao;
+package com.example.partycalculator.db.dao;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
