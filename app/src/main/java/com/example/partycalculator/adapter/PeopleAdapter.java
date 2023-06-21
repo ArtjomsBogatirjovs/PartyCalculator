@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.partycalculator.R;
 import com.example.partycalculator.entity.Human;
+import com.example.partycalculator.listeners.OnDeleteClickListener;
+import com.example.partycalculator.listeners.OnEditClickListener;
 
 import java.util.List;
 
@@ -61,14 +63,6 @@ public class PeopleAdapter extends RecyclerView.Adapter<PeopleAdapter.ViewHolder
     @Override
     public int getItemCount() {
         return peopleList.size();
-    }
-
-    public interface OnEditClickListener {
-        void onEditClick(int position);
-    }
-
-    public interface OnDeleteClickListener {
-        void onDeleteClick(int position);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

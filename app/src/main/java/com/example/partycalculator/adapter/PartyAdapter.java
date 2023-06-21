@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.partycalculator.R;
 import com.example.partycalculator.entity.Party;
+import com.example.partycalculator.listeners.OnItemClickListener;
+import com.example.partycalculator.listeners.OnRemoveButtonClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +77,7 @@ public class PartyAdapter extends RecyclerView.Adapter<PartyAdapter.PartyViewHol
 
         @Override
         public void onClick(View v) {
-            int position = getAdapterPosition();
+            int position = getBindingAdapterPosition();
             if (v.getId() == R.id.button_remove) {
                 if (position != RecyclerView.NO_POSITION && removeButtonClickListener != null) {
                     Party party = partyList.get(position);
@@ -88,13 +90,5 @@ public class PartyAdapter extends RecyclerView.Adapter<PartyAdapter.PartyViewHol
                 }
             }
         }
-    }
-
-    public interface OnRemoveButtonClickListener {
-        void onRemoveButtonClick(Party party);
-    }
-
-    public interface OnItemClickListener {
-        void onItemClick(Party party);
     }
 }

@@ -17,11 +17,12 @@ import com.example.partycalculator.db.dao.PartyDao;
 import com.example.partycalculator.db.AppDatabase;
 import com.example.partycalculator.entity.Party;
 import com.example.partycalculator.entity.PartySingleton;
+import com.example.partycalculator.listeners.OnItemClickListener;
+import com.example.partycalculator.listeners.OnRemoveButtonClickListener;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class PartyListActivity extends AppCompatActivity implements PartyAdapter.OnItemClickListener, PartyAdapter.OnRemoveButtonClickListener {
+public class PartyListActivity extends AppCompatActivity implements OnItemClickListener, OnRemoveButtonClickListener {
     private PartyDao partyDao;
     private PartyAdapter partyAdapter;
     private List<Party> allParties;

@@ -66,6 +66,27 @@ public class SelectPeopleAdapter extends RecyclerView.Adapter<SelectPeopleAdapte
         return selectedPositionsPrice;
     }
 
+    public void selectPerson(int position) {
+        if (!isSelected(position)) {
+            selectedPositions.add(position);
+            notifyItemChanged(position);
+        }
+    }
+
+    public void selectBySysId(List<Long> sysIds) {
+        for (int i = 0; i < peopleList.size(); i++) {
+            if (sysIds.contains(peopleList.get(i).getSysId())) {
+                selectPerson(i);
+            }
+        }
+    }
+
+    public void deselectAllPeople() {
+        int selectedSize = selectedPositions.size();
+        selectedPositions.clear();
+        notifyItemRangeChanged(0, selectedSize);
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final CheckBox checkBoxPerson;
         private final TextView textViewPersonName;
@@ -86,9 +107,9 @@ public class SelectPeopleAdapter extends RecyclerView.Adapter<SelectPeopleAdapte
 
             checkBoxPerson.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked) {
-                    selectedPositions.add(getAdapterPosition());
+                    selectedPositions.add(getBindingAdapterPosition());
                 } else {
-                    selectedPositions.remove(Integer.valueOf(getAdapterPosition()));
+                    selectedPositions.remove(Integer.valueOf(getBindingAdapterPosition()));
                 }
             });
             editTextPricePaid.setFilters(new InputFilter[]{new DecimalDigitsInputFilter()});
