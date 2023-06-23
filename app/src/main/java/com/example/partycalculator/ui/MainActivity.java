@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.example.partycalculator.R;
+import com.example.partycalculator.utils.Functions;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,6 +20,18 @@ public class MainActivity extends AppCompatActivity {
         AppCompatButton createParty = findViewById(R.id.create_party);
         AppCompatButton openParties = findViewById(R.id.list_party);
         AppCompatButton exit = findViewById(R.id.exit);
+        AppCompatButton lastParty = findViewById(R.id.last_party);
+        if (Functions.getPartySysId() != null) {
+            lastParty.setVisibility(View.VISIBLE);
+            lastParty.setText(Functions.getParty().getName());
+            lastParty.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, PartyActivity.class);
+                startActivity(intent);
+            });
+        } else {
+            lastParty.setVisibility(View.GONE);
+        }
+
         createParty.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, CreatePartyActivity.class);
             startActivity(intent);
@@ -38,5 +51,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         finishAffinity();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AppCompatButton lastParty = findViewById(R.id.last_party);
+        if (Functions.getPartySysId() != null) {
+            lastParty.setVisibility(View.VISIBLE);
+            lastParty.setText(Functions.getParty().getName());
+            lastParty.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, PartyActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 }

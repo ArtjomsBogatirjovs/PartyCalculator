@@ -16,15 +16,18 @@ public class ItemConsumer {
     private long humanSysId;
     @ColumnInfo
     private BigDecimal paid;
+    @ColumnInfo
+    private BigDecimal toPay;
 
     public ItemConsumer() {
     }
 
-    public ItemConsumer(long sysId, long itemSysId, long humanSysId, BigDecimal paid) {
+    public ItemConsumer(long sysId, long itemSysId, long humanSysId, BigDecimal paid, BigDecimal toPay) {
         this.sysId = sysId;
         this.itemSysId = itemSysId;
         this.humanSysId = humanSysId;
         this.paid = paid;
+        this.toPay = toPay;
     }
 
     public long getSysId() {
@@ -57,5 +60,13 @@ public class ItemConsumer {
 
     public void setHumanSysId(long humanSysId) {
         this.humanSysId = humanSysId;
+    }
+
+    public BigDecimal getToPay() {
+        return toPay;
+    }
+
+    public void setToPay(BigDecimal toPay) {
+        this.toPay = toPay;
     }
 }

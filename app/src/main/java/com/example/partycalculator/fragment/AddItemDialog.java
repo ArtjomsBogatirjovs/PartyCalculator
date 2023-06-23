@@ -1,10 +1,13 @@
 package com.example.partycalculator.fragment;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -27,9 +30,12 @@ import com.example.partycalculator.filter.DecimalDigitsInputFilter;
 import com.example.partycalculator.filter.DigitsInputFilter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AddItemDialog extends AppCompatDialogFragment {
     private EditText editTextName;
@@ -39,15 +45,17 @@ public class AddItemDialog extends AppCompatDialogFragment {
     private final List<Human> peopleList;
     private Item editItem;
     private List<Long> humanSysIds;
+    private List<ItemConsumer> consumers;
 
     public AddItemDialog(List<Human> peopleList) {
         this.peopleList = peopleList;
     }
 
-    public AddItemDialog(List<Human> peopleList, Item item, List<Long> humanSysIds) {
+    public AddItemDialog(List<Human> peopleList, Item item, List<Long> humanSysIds, List<ItemConsumer> consumers) {
         this.peopleList = peopleList;
         this.editItem = item;
         this.humanSysIds = humanSysIds;
+        this.consumers = consumers;
     }
 
     @NonNull
@@ -76,9 +84,103 @@ public class AddItemDialog extends AppCompatDialogFragment {
         editTextQuantity.setFilters(new InputFilter[]{new DigitsInputFilter()});
 
         RecyclerView recyclerViewPeople = view.findViewById(R.id.recyclerViewPeople);
-        SelectPeopleAdapter adapter = new SelectPeopleAdapter(peopleList);
+
+        BigDecimal tempPrice = BigDecimal.ZERO;
+        if (!editTextPrice.getText().toString().isEmpty()) {
+            tempPrice = new BigDecimal(editTextPrice.getText().toString().trim());
+        }
+
+        int tempQuantity = 1;
+        if (!editTextQuantity.getText().toString().isEmpty()) {
+            tempQuantity = Integer.parseInt(editTextQuantity.getText().toString().trim());
+        }
+        BigDecimal fullPrice = tempPrice.multiply(BigDecimal.valueOf(tempQuantity));
+
+        SelectPeopleAdapter adapter = new SelectPeopleAdapter(peopleList, fullPrice);
         recyclerViewPeople.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerViewPeople.setAdapter(adapter);
+
+        editTextQuantity.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s != null) {
+                    String pricePaidStr = s.toString().trim();
+                    BigDecimal currentPrice = BigDecimal.ZERO;
+                    if (!editTextPrice.getText().toString().isEmpty()) {
+                        currentPrice = new BigDecimal(editTextPrice.getText().toString().trim());
+                    }
+                    if (!pricePaidStr.isEmpty()) {
+                        adapter.setFullPrice(new BigDecimal(pricePaidStr).multiply(currentPrice));
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        adapter.setFullPrice(BigDecimal.ONE.multiply(currentPrice));
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        });
+
+        editTextPrice.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s != null) {
+                    String pricePaidStr = s.toString().trim();
+
+                    String twoPoints = ".*\\..*\\..*";
+                    String twoNumbersAfterPoint = "\\d*\\.\\d{0,2}$";
+
+                    Pattern pattern = Pattern.compile(twoPoints);
+                    Matcher matcher = pattern.matcher(pricePaidStr);
+                    boolean isTwoPoints = matcher.matches();
+
+                    pattern = Pattern.compile(twoNumbersAfterPoint);
+                    matcher = pattern.matcher(pricePaidStr);
+                    boolean isMaxTwoNumbers = matcher.matches();
+
+                    boolean isPoint = pricePaidStr.contains(".");
+
+                    if (isTwoPoints ||
+                            (isPoint && !isMaxTwoNumbers)) {
+                        pricePaidStr = pricePaidStr.substring(0, pricePaidStr.length() - 1);
+                        editTextPrice.setText(pricePaidStr);
+                        editTextPrice.setSelection(pricePaidStr.length());
+                    }
+                    int currentQuantity = 1;
+                    if (!editTextQuantity.getText().toString().isEmpty()) {
+                        currentQuantity = Integer.parseInt(editTextQuantity.getText().toString().trim());
+                    }
+                    if (!pricePaidStr.isEmpty()) {
+                        adapter.setFullPrice(new BigDecimal(pricePaidStr).multiply(new BigDecimal(currentQuantity)));
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        adapter.setFullPrice(BigDecimal.ZERO.multiply(new BigDecimal(currentQuantity)));
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        });
 
         Button buttonSelectAll = view.findViewById(R.id.buttonSelectAll);
         Button buttonDeselectAll = view.findViewById(R.id.buttonDeselectAll);
@@ -92,9 +194,7 @@ public class AddItemDialog extends AppCompatDialogFragment {
 
         builder.setView(view)
                 .setTitle("Add Item")
-                .setNegativeButton("Cancel", (dialog, which) -> {
-                    listener.onCancel();
-                })
+                .setNegativeButton("Cancel", (dialog, which) -> listener.onCancel())
                 .setPositiveButton("Add", (dialog, which) -> {
                     if (editTextName.getText().toString().isEmpty()
                             || editTextPrice.getText().toString().isEmpty()
@@ -115,21 +215,37 @@ public class AddItemDialog extends AppCompatDialogFragment {
                     newItem.setQuantity(quantity);
                     newItem.setFullPrice(price.multiply(BigDecimal.valueOf(quantity)));
                     newItem.setPartySysId(PartySingleton.getInstance().getParty().getSysId());
+                    if (!adapter.getItemOwner().isEmpty()) {
+                        newItem.setItemOwnerSysId(peopleList.get(adapter.getItemOwner().get(0)).getSysId());
+                    }
 
                     List<Integer> positions = adapter.getSelectedPositions();
+                    BigDecimal toPay = newItem.getFullPrice().divide(BigDecimal.valueOf(positions.size()), 2, RoundingMode.HALF_UP);
                     Map<Integer, BigDecimal> prices = adapter.getSelectedPositionsPrice();
                     List<ItemConsumer> result = new ArrayList<>();
                     BigDecimal allPaid = BigDecimal.ZERO;
                     for (int pos : positions) {
-                        allPaid = allPaid.add(prices.get(pos));
-                        Human tempHuman = peopleList.get(pos);
                         BigDecimal pay = prices.get(pos);
+                        if (pay == null) {
+                            pay = BigDecimal.ZERO;
+                        }
+                        allPaid = allPaid.add(pay);
+
+                        Human tempHuman = peopleList.get(pos);
+
                         ItemConsumer itemConsumer = new ItemConsumer();
                         itemConsumer.setPaid(pay);
                         itemConsumer.setHumanSysId(tempHuman.getSysId());
+                        itemConsumer.setToPay(toPay.subtract(pay));
                         result.add(itemConsumer);
+
+                        if (pay.compareTo(newItem.getFullPrice()) > 0) {
+                            listener.onCancel();
+                            Toast.makeText(getContext(), tempHuman.getName() + " paid can't be bigger than full price!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                     }
-                    if (allPaid.compareTo(editItem.getFullPrice()) > 0) {
+                    if (allPaid.compareTo(newItem.getFullPrice()) > 0 && adapter.getItemOwner().isEmpty()) {
                         listener.onCancel();
                         Toast.makeText(getContext(), "Total pays can't be bigger than full price!", Toast.LENGTH_SHORT).show();
                         return;
@@ -156,15 +272,111 @@ public class AddItemDialog extends AppCompatDialogFragment {
         editTextPrice.setText(String.valueOf(editItem.getPrice()));
         editTextQuantity.setText(String.valueOf(editItem.getQuantity()));
 
+
         RecyclerView recyclerViewPeople = view.findViewById(R.id.recyclerViewPeople);
-        SelectPeopleAdapter adapter = new SelectPeopleAdapter(peopleList);
+        BigDecimal tempPrice = BigDecimal.ZERO;
+        if (!editTextPrice.getText().toString().isEmpty()) {
+            tempPrice = new BigDecimal(editTextPrice.getText().toString().trim());
+        }
+
+        int tempQuantity = 1;
+        if (!editTextQuantity.getText().toString().isEmpty()) {
+            tempQuantity = Integer.parseInt(editTextQuantity.getText().toString().trim());
+        }
+        BigDecimal fullPrice = tempPrice.multiply(BigDecimal.valueOf(tempQuantity));
+
+        final SelectPeopleAdapter adapter = new SelectPeopleAdapter(peopleList, fullPrice);
         recyclerViewPeople.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerViewPeople.setAdapter(adapter);
+        editTextQuantity.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s != null) {
+                    String pricePaidStr = s.toString().trim();
+                    BigDecimal currentPrice = BigDecimal.ZERO;
+                    if (!editTextPrice.getText().toString().isEmpty()) {
+                        currentPrice = new BigDecimal(editTextPrice.getText().toString().trim());
+                    }
+                    if (!pricePaidStr.isEmpty()) {
+                        adapter.setFullPrice(new BigDecimal(pricePaidStr).multiply(currentPrice));
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        adapter.setFullPrice(BigDecimal.ONE.multiply(currentPrice));
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        });
+
+        editTextPrice.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s != null) {
+                    String pricePaidStr = s.toString().trim();
+
+                    String twoPoints = ".*\\..*\\..*";
+                    String twoNumbersAfterPoint = "\\d*\\.\\d{0,2}$";
+
+                    Pattern pattern = Pattern.compile(twoPoints);
+                    Matcher matcher = pattern.matcher(pricePaidStr);
+                    boolean isTwoPoints = matcher.matches();
+
+                    pattern = Pattern.compile(twoNumbersAfterPoint);
+                    matcher = pattern.matcher(pricePaidStr);
+                    boolean isMaxTwoNumbers = matcher.matches();
+
+                    boolean isPoint = pricePaidStr.contains(".");
+
+                    if (isTwoPoints ||
+                            (isPoint && !isMaxTwoNumbers)) {
+                        pricePaidStr = pricePaidStr.substring(0, pricePaidStr.length() - 1);
+                        editTextPrice.setText(pricePaidStr);
+                        editTextPrice.setSelection(pricePaidStr.length());
+                    }
+                    int currentQuantity = 1;
+                    if (!editTextQuantity.getText().toString().isEmpty()) {
+                        currentQuantity = Integer.parseInt(editTextQuantity.getText().toString().trim());
+                    }
+                    if (!pricePaidStr.isEmpty()) {
+                        adapter.setFullPrice(new BigDecimal(pricePaidStr).multiply(new BigDecimal(currentQuantity)));
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        adapter.setFullPrice(BigDecimal.ZERO.multiply(new BigDecimal(currentQuantity)));
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        });
+
 
         Button buttonSelectAll = view.findViewById(R.id.buttonSelectAll);
         Button buttonDeselectAll = view.findViewById(R.id.buttonDeselectAll);
 
         adapter.selectBySysId(humanSysIds);
+        adapter.setPaid(consumers);
+        adapter.selectOwnerBySysId(editItem.getItemOwnerSysId());
 
         buttonSelectAll.setOnClickListener(v -> {
             for (int i = 0; i < adapter.getItemCount(); i++) {
@@ -175,9 +387,7 @@ public class AddItemDialog extends AppCompatDialogFragment {
 
         builder.setView(view)
                 .setTitle("Edit")
-                .setNegativeButton("Cancel", (dialog, which) -> {
-                    listener.onCancel();
-                })
+                .setNegativeButton("Cancel", (dialog, which) -> listener.onCancel())
                 .setPositiveButton("Save", (dialog, which) -> {
                     if (editTextName.getText().toString().isEmpty()
                             || editTextPrice.getText().toString().isEmpty()
@@ -196,23 +406,37 @@ public class AddItemDialog extends AppCompatDialogFragment {
                     editItem.setPrice(price);
                     editItem.setQuantity(quantity);
                     editItem.setFullPrice(price.multiply(BigDecimal.valueOf(quantity)));
-
+                    if (!adapter.getItemOwner().isEmpty()) {
+                        editItem.setItemOwnerSysId(peopleList.get(adapter.getItemOwner().get(0)).getSysId());
+                    } else {
+                        editItem.setItemOwnerSysId(0);
+                    }
                     List<Integer> positions = adapter.getSelectedPositions();
+                    BigDecimal toPay = editItem.getFullPrice().divide(BigDecimal.valueOf(positions.size()), 2, RoundingMode.HALF_UP);
                     Map<Integer, BigDecimal> prices = adapter.getSelectedPositionsPrice();
                     List<ItemConsumer> result = new ArrayList<>();
                     BigDecimal allPaid = BigDecimal.ZERO;
                     for (int pos : positions) {
-                        if (prices.get(pos) != null) {
-                            allPaid = allPaid.add(prices.get(pos));
-                        }
-                        Human tempHuman = peopleList.get(pos);
                         BigDecimal pay = prices.get(pos);
+                        if (pay == null) {
+                            pay = BigDecimal.ZERO;
+                        }
+                        allPaid = allPaid.add(pay);
+
+                        Human tempHuman = peopleList.get(pos);
+
                         ItemConsumer itemConsumer = new ItemConsumer();
                         itemConsumer.setPaid(pay);
                         itemConsumer.setHumanSysId(tempHuman.getSysId());
+                        itemConsumer.setToPay(toPay.subtract(pay));
                         result.add(itemConsumer);
+                        if (pay.compareTo(editItem.getFullPrice()) > 0) {
+                            listener.onCancel();
+                            Toast.makeText(getContext(), tempHuman.getName() + " paid can't be bigger than full price!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                     }
-                    if (allPaid.compareTo(editItem.getFullPrice()) > 0) {
+                    if (allPaid.compareTo(editItem.getFullPrice()) > 0 && adapter.getItemOwner().isEmpty()) {
                         listener.onCancel();
                         Toast.makeText(getContext(), "Total pays can't be bigger than full price!", Toast.LENGTH_SHORT).show();
                         return;

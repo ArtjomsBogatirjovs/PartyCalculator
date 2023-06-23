@@ -20,17 +20,20 @@ public class Item {
     private BigDecimal fullPrice;
     @ColumnInfo(name = "partySysId")
     private long partySysId;
+    @ColumnInfo
+    private long itemOwnerSysId;
 
     public Item() {
     }
 
-    public Item(long sysId, String name, BigDecimal price, int quantity, BigDecimal fullPrice, long partySysId) {
+    public Item(long sysId, String name, BigDecimal price, int quantity, BigDecimal fullPrice, long partySysId, long itemOwnerSysId) {
         this.sysId = sysId;
         this.name = name;
         this.price = price;
         this.quantity = quantity;
         this.fullPrice = fullPrice;
         this.partySysId = partySysId;
+        this.itemOwnerSysId = itemOwnerSysId;
     }
 
     public long getSysId() {
@@ -79,5 +82,13 @@ public class Item {
 
     public void setPartySysId(long partySysId) {
         this.partySysId = partySysId;
+    }
+
+    public long getItemOwnerSysId() {
+        return itemOwnerSysId;
+    }
+
+    public void setItemOwnerSysId(long itemOwnerSysId) {
+        this.itemOwnerSysId = itemOwnerSysId;
     }
 }

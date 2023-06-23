@@ -119,7 +119,12 @@ public class ItemActivity extends PartyToolbarActivity implements AddItemDialog.
         for (ItemConsumer consumer : itemConsumerDao.getAllItemsConsumersByItem(itemList.get(position).getSysId())) {
             sysIds.add(consumer.getHumanSysId());
         }
-        AddItemDialog dialog = new AddItemDialog(humanDao.getAllHumanInParty(PartySingleton.getInstance().getParty().getSysId()), itemList.get(position), sysIds);
+        AddItemDialog dialog = new AddItemDialog(
+                humanDao.getAllHumanInParty(PartySingleton.getInstance().getParty().getSysId()),
+                itemList.get(position),
+                sysIds,
+                itemConsumerDao.getAllItemsConsumersByItem(itemList.get(position).getSysId())
+        );
         dialog.show(getSupportFragmentManager(), "AddItemDialog");
     }
 }
