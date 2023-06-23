@@ -59,32 +59,33 @@ public class DebtCalculatorService implements DebtService {
                         }
                     }
                 } else {
-                    for (ItemConsumer ic : itemConsumers) {
-                        if (ic.getToPay().compareTo(BigDecimal.ZERO) > 0) {
-                            BigDecimal toPay = ic.getToPay();
-                            for (ItemConsumer consumer : itemConsumers) {
-                                if (ic.getSysId() == consumer.getSysId()) {
+                    for (ItemConsumer debtor : itemConsumers) {
+                        if (debtor.getToPay().compareTo(BigDecimal.ZERO) > 0) {
+                            BigDecimal toPay = debtor.getToPay();
+                            for (ItemConsumer creditor : itemConsumers) {
+                                if (debtor.getSysId() == creditor.getSysId()) {
                                     continue;
                                 }
-                                if (consumer.getToPay().compareTo(BigDecimal.ZERO) < 0) {
-                                    if (toPay.add(consumer.getToPay()).compareTo(BigDecimal.ZERO) > 0) {
+                                if (creditor.getToPay().compareTo(BigDecimal.ZERO) < 0) {
+                                    if (toPay.add(creditor.getToPay()).compareTo(BigDecimal.ZERO) > 0) {
                                         Debt debt = new Debt();
                                         debt.setPartySysId(party.getSysId());
-                                        debt.setCreditorSysId(consumer.getHumanSysId());
-                                        debt.setDebtorSysId(ic.getHumanSysId());
-                                        debt.setDebt(consumer.getToPay().multiply(new BigDecimal(-1)));
+                                        debt.setCreditorSysId(creditor.getHumanSysId());
+                                        debt.setDebtorSysId(debtor.getHumanSysId());
+                                        debt.setDebt(creditor.getToPay().multiply(new BigDecimal(-1)));
                                         debtDao.insertDebt(debt);
-                                        toPay = toPay.add(consumer.getToPay());
-                                        consumer.setToPay(BigDecimal.ZERO);
+                                        toPay = toPay.add(creditor.getToPay());
+                                        creditor.setToPay(BigDecimal.ZERO);
                                     } else {
                                         Debt debt = new Debt();
                                         debt.setPartySysId(party.getSysId());
-                                        debt.setCreditorSysId(consumer.getHumanSysId());
-                                        debt.setDebtorSysId(ic.getHumanSysId());
+                                        debt.setCreditorSysId(creditor.getHumanSysId());
+                                        debt.setDebtorSysId(debtor.getHumanSysId());
                                         debt.setDebt(toPay);
                                         debtDao.insertDebt(debt);
+                                        creditor.setToPay(toPay.add(creditor.getToPay()));
                                         toPay = BigDecimal.ZERO;
-                                        consumer.setToPay(toPay.add(consumer.getToPay()));
+                                        debtor.setToPay(toPay);
                                     }
                                 }
                                 if (toPay.compareTo(BigDecimal.ZERO) <= 0) {

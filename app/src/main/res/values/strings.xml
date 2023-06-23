@@ -38,4 +38,8 @@
     <string name="fullprice">FullPrice</string>
     <string name="add">Add</string>
     <string name="simple_view">Simple view</string>
+    <string name="simplest_view">Simplest view</string>
+    <string name="debtor">Debtor</string>
+    <string name="action">Action</string>
+    <string name="creditor">Creditor</string>
 </resources>

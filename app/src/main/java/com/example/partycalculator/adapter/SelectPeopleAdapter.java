@@ -157,13 +157,14 @@ public class SelectPeopleAdapter extends RecyclerView.Adapter<SelectPeopleAdapte
             textViewPersonName.setText(person.getName());
             if (!itemOwner.isEmpty() && !isOwner) {
                 checkBoxOwner.setEnabled(false);
+                editTextPricePaid.setEnabled(true);
             }
-            if (itemOwner.isEmpty()) {
+            if (itemOwner.isEmpty() || isOwner) {
                 checkBoxOwner.setEnabled(true);
             }
-            if(isOwner){
+            if (isOwner) {
                 editTextPricePaid.setEnabled(false);
-                if(fullPrice != null){
+                if (fullPrice != null) {
                     editTextPricePaid.setText(fullPrice.toString());
                 }
             }
@@ -171,10 +172,15 @@ public class SelectPeopleAdapter extends RecyclerView.Adapter<SelectPeopleAdapte
                 editTextPricePaid.setEnabled(false);
                 checkBoxOwner.setEnabled(false);
             }
+            if(isSelected && itemOwner.isEmpty()){
+                checkBoxOwner.setEnabled(true);
+                editTextPricePaid.setEnabled(true);
+            }
 
-            if(selectedPositionsPrice.get(getBindingAdapterPosition()) != null){
+            if (selectedPositionsPrice.get(getBindingAdapterPosition()) != null && !selectedPositionsPrice.get(getBindingAdapterPosition()).toString().isEmpty()) {
                 editTextPricePaid.setText(selectedPositionsPrice.get(getBindingAdapterPosition()).toString());
             }
+            checkBoxOwner.setOnCheckedChangeListener(null);
             checkBoxOwner.setChecked(isOwner);
             checkBoxOwner.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked) {
@@ -186,13 +192,12 @@ public class SelectPeopleAdapter extends RecyclerView.Adapter<SelectPeopleAdapte
                 }
                 itemView.post(SelectPeopleAdapter.this::notifyDataSetChanged);
             });
-
-            checkBoxPerson.setChecked(isSelected);
             checkBoxPerson.setOnCheckedChangeListener(null);
+            checkBoxPerson.setChecked(isSelected);
             checkBoxPerson.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked) {
                     editTextPricePaid.setEnabled(true);
-                    checkBoxOwner.setEnabled(true);
+                    //checkBoxOwner.setEnabled(true);
                     //selectedPositions.add(getBindingAdapterPosition());
                     selectPerson(getBindingAdapterPosition());
                 } else {
@@ -200,7 +205,7 @@ public class SelectPeopleAdapter extends RecyclerView.Adapter<SelectPeopleAdapte
                     selectedPositions.remove(Integer.valueOf(getBindingAdapterPosition()));
                     itemOwner.remove(Integer.valueOf(getBindingAdapterPosition()));
                 }
-                itemView.post(SelectPeopleAdapter.this::notifyDataSetChanged);
+                itemView.post(() -> notifyItemChanged(getBindingAdapterPosition()));
             });
             editTextPricePaid.setFilters(new InputFilter[]{new DecimalDigitsInputFilter()});
             editTextPricePaid.addTextChangedListener(new TextWatcher() {
@@ -218,7 +223,6 @@ public class SelectPeopleAdapter extends RecyclerView.Adapter<SelectPeopleAdapte
                 public void afterTextChanged(Editable s) {
                     if (s != null) {
                         String pricePaidStr = s.toString().trim();
-
 
                         String twoPoints = ".*\\..*\\..*";
                         String twoNumbersAfterPoint = "\\d*\\.\\d{0,2}$";

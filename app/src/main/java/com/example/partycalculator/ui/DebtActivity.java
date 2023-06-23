@@ -1,5 +1,6 @@
 package com.example.partycalculator.ui;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.Button;
 
@@ -11,7 +12,6 @@ import com.example.partycalculator.adapter.DebtAdapter;
 import com.example.partycalculator.db.AppDatabase;
 import com.example.partycalculator.db.dao.DebtDao;
 import com.example.partycalculator.entity.Debt;
-import com.example.partycalculator.entity.PartySingleton;
 import com.example.partycalculator.utils.DebtCalculatorService;
 import com.example.partycalculator.utils.Functions;
 
@@ -23,6 +23,7 @@ import java.util.Objects;
 public class DebtActivity extends PartyToolbarActivity {
     private DebtDao debtDao;
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,9 +39,14 @@ public class DebtActivity extends PartyToolbarActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        Button btnAddItem = findViewById(R.id.btnSimpleView);
-        btnAddItem.setOnClickListener(v -> {
+        Button btnSimpleView = findViewById(R.id.btnSimpleView);
+        btnSimpleView.setOnClickListener(v -> {
             adapter.setDebtList(getSimpleList());
+            adapter.notifyDataSetChanged();
+        });
+        Button btnSimplestView = findViewById(R.id.btnSimplestView);
+        btnSimplestView.setOnClickListener(v -> {
+            adapter.setDebtList(getSimplestList());
             adapter.notifyDataSetChanged();
         });
     }
@@ -50,7 +56,7 @@ public class DebtActivity extends PartyToolbarActivity {
         List<Debt> debtList = debtDao.getAllDebt(Functions.getPartySysId());
         for (Debt tempDebt : debtList) {
             Debt debt = getDebt(tempDebt.getDebtorSysId(), tempDebt.getCreditorSysId(), newDebts);
-            if(debt == null){
+            if (debt == null) {
                 debt = new Debt();
                 debt.setDebt(tempDebt.getDebt());
                 debt.setDebtorSysId(tempDebt.getDebtorSysId());
@@ -63,6 +69,49 @@ public class DebtActivity extends PartyToolbarActivity {
             }
         }
         return newDebts;
+    }
+
+    private List<Debt> getSimplestList() {
+        List<Debt> newDebts = new ArrayList<>();
+        List<Debt> debtList = debtDao.getAllDebt(Functions.getPartySysId());
+        for (Debt tempDebt : debtList) {
+            Debt debt = getDebt(tempDebt.getDebtorSysId(), tempDebt.getCreditorSysId(), newDebts);
+            if (debt == null) {
+                debt = new Debt();
+                debt.setDebt(tempDebt.getDebt());
+                debt.setDebtorSysId(tempDebt.getDebtorSysId());
+                debt.setPartySysId(tempDebt.getPartySysId());
+                debt.setCreditorSysId(tempDebt.getCreditorSysId());
+                newDebts.add(debt);
+            } else {
+                BigDecimal newDebt = debt.getDebt().add(tempDebt.getDebt());
+                debt.setDebt(newDebt);
+            }
+        }
+        List<Debt> usedDebts = new ArrayList<>();
+        List<Debt> result = new ArrayList<>();
+        for (Debt tempDebt : newDebts) {
+            if (usedDebts.contains(tempDebt)) {
+                continue;
+            }
+            Debt oppositeDebt = getDebt(tempDebt.getCreditorSysId(), tempDebt.getDebtorSysId(), newDebts);
+            if (oppositeDebt != null) {
+                usedDebts.add(oppositeDebt);
+                BigDecimal newDebt;
+                if (tempDebt.getDebt().compareTo(oppositeDebt.getDebt()) > 0) {
+                    newDebt = tempDebt.getDebt().subtract(oppositeDebt.getDebt());
+                    tempDebt.setDebt(newDebt);
+                    result.add(tempDebt);
+                } else {
+                    newDebt = oppositeDebt.getDebt().subtract(tempDebt.getDebt());
+                    oppositeDebt.setDebt(newDebt);
+                    result.add(oppositeDebt);
+                }
+            } else {
+                result.add(tempDebt);
+            }
+        }
+        return result;
     }
 
     private Debt getDebt(Long debtor, Long creditor, List<Debt> newDebts) {

@@ -23,7 +23,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Debtor"
+            android:text="@string/debtor"
             android:textSize="16sp" />
 
         <TextView
@@ -32,7 +32,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Action"
+            android:text="@string/action"
             android:textSize="16sp" />
 
         <TextView
@@ -41,7 +41,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Creditor" />
+            android:text="@string/creditor" />
 
         <TextView
             android:id="@+id/textViewDebt"
@@ -49,7 +49,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Debt" />
+            android:text="@string/debt" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -58,10 +58,27 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <Button
-        android:id="@+id/btnSimpleView"
+
+    <LinearLayout
+        android:id="@+id/buttons_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/simple_view" />
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnSimpleView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/simple_view" />
+
+        <Button
+            android:id="@+id/btnSimplestView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/simplest_view" />
+
+    </LinearLayout>
 
 </LinearLayout>
